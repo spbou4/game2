@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loterie 7 sur 49</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f0f0f0;
+            margin: 0;
+        }
+        .lottery-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .numbers, .drawn-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .number, .chosen-number, .drawn-number {
+            width: 50px;
+            height: 50px;
+            background: #4CAF50;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            margin: 5px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .number.chosen {
+            background: #FF5722;
+        }
+        .chosen-number {
+            background: #FF5722;
+            cursor: default;
+        }
+        .drawn-number {
+            background: #2196F3;
+        }
+        .draw-button, .choose-button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+        }
+        .draw-button:hover, .choose-button:hover {
+            background-color: #1976D2;
+        }
+        .results {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="lottery-container">
+        <div class="numbers" id="numbersContainer">
+            <!-- Les numéros seront générés par JavaScript -->
+        </div>
+        <button class="choose-button" onclick="chooseNumbers()">Valider les numéros choisis</button>
+        <button class="draw-button" onclick="drawNumbers()" style="display:none;">Tirer les numéros</button>
+        <div class="drawn-numbers" id="drawnNumbersContainer" style="display:none;">
+            <!-- Les numéros tirés seront affichés ici -->
+        </div>
+        <div class="results" id="results">Choisissez vos 7 numéros.</div>
+    </div>
+
+    <script>
+        const numbersContainer = document.getElementById('numbersContainer');
+        const drawnNumbersContainer = document.getElementById('drawnNumbersContainer');
+        const results = document.getElementById('results');
+        const drawButton = document.querySelector('.draw-button');
+        const chooseButton = document.querySelector('.choose-button');
+        const chosenNumbers = [];
+        const drawnNumbers = [];
+
+        // Générer les numéros de 1 à 49
+        for (let i = 1; i <= 49; i++) {
+            const numberElement = document.createElement('div');
+            numberElement.className = 'number';
+            numberElement.textContent = i;
+            numberElement.onclick = () => chooseNumber(i, numberElement);
+            numbersContainer.appendChild(numberElement);
+        }
+
+        function chooseNumber(number, element) {
+            if (chosenNumbers.length < 7 && !chosenNumbers.includes(number)) {
+                chosenNumbers.push(number);
+                element.classList.add('chosen');
+            }
+        }
+
+        function chooseNumbers() {
+            if (chosenNumbers.length !== 7) {
+                results.textContent = 'Vous devez choisir exactement 7 numéros.';
+                return;
+            }
+            document.querySelectorAll('.number').forEach(el => el.onclick = null);
+            chooseButton.style.display = 'none';
+            drawButton.style.display = 'block';
+            results.textContent = 'Numéros choisis : ' + chosenNumbers.join(', ');
+        }
+
+        function getRandomNumber() {
+            let number;
+            do {
+                number = Math.floor(Math.random() * 49) + 1;
+            } while (drawnNumbers.includes(number));
+            return number;
+        }
+
+        function drawNumbers() {
+            drawnNumbersContainer.style.display = 'flex';
+            if (drawnNumbers.length < 7) {
+                const number = getRandomNumber();
+                drawnNumbers.push(number);
+                const numberElement = document.createElement('div');
+                numberElement.className = 'drawn-number';
+                numberElement.textContent = number;
+                drawnNumbersContainer.appendChild(numberElement);
+
+                setTimeout(drawNumbers, 1000);
+            } else {
+                compareNumbers();
+            }
+        }
+
+        function compareNumbers() {
+            const matches = chosenNumbers.filter(num => drawnNumbers.includes(num)).length;
+            let message = `Vous avez ${matches} numéros correspondants. `;
+            if (matches === 4) {
+                message += 'Vous gagnez 1000$!';
+            } else if (matches === 5) {
+                message += 'Vous gagnez 10 000$!';
+            } else if (matches === 6) {
+                message += 'Vous gagnez 100 000$!';
+            } else if (matches === 7) {
+                message += 'Vous gagnez 10 millions de dollars!';
+            } else {
+                message += 'Essayez encore!';
+            }
+            results.textContent = message;
+        }
+    </script>
+</body>
+</html>
